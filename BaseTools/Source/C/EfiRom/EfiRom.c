@@ -1408,6 +1408,7 @@ Returns:
   FILE                          *InFptr;
   UINT32                        ImageStart;
   UINT32                        ImageCount;
+  UINT32                        ImageSize;
   EFI_PCI_EXPANSION_ROM_HEADER  EfiRomHdr;
   PCI_DATA_STRUCTURE            PciDs23;
   PCI_3_0_DATA_STRUCTURE        PciDs30;
@@ -1557,6 +1558,7 @@ Returns:
     //
     // Print the code type. If EFI code, then we can provide more info.
     //
+//    UINT16 CodeType = (mOptions.Pci23 == 1) ? PciDs23.CodeType : PciDs30.CodeType;
     if (mOptions.Pci23 == 1) {
       fprintf (stdout, "    Code type              0x%02X", PciDs23.CodeType);
     } else {
@@ -1617,11 +1619,69 @@ Returns:
       //
       fprintf (stdout, "\n");
     }
-    //
-    // If code type is EFI image, then dump it as well?
-    //
-    // if (PciDs.CodeType == PCI_CODE_TYPE_EFI_IMAGE) {
-    // }
+
+    ImageSize = ((mOptions.Pci23 == 1) ? PciDs23.ImageLength : PciDs30.ImageLength) * 512;
+
+    if (mOptions.OutFileName[0] && ImageSize > EfiRomHdr.EfiImageHeaderOffset) {
+      UINT32 ImageDataSize = ImageSize - EfiRomHdr.EfiImageHeaderOffset;
+      if (fseek (InFptr, EfiRomHdr.EfiImageHeaderOffset + ImageStart, SEEK_SET)) {
+        Error (NULL, 0, 3001, "Not supported", "Failed to seek to next image!");
+        goto BailOut;
+      }
+
+      VOID *ImageData = malloc(ImageDataSize);
+      if (!ImageData) {
+        Error (NULL, 0, 4003, "Resource", "memory cannot be allocated!");
+        goto BailOut;
+      }
+      if (fread(ImageData, ImageDataSize, 1, InFptr) != 1) {
+        Error (NULL, 0, 2000, "Invalid", "Failed to read all bytes from input file.");
+        goto BailOut;
+      }
+
+      if (EfiRomHdr.CompressionType == EFI_PCI_EXPANSION_ROM_HEADER_COMPRESSED) {
+        UINT32 DecompSize;
+        UINT32 ScratchSize;
+        EFI_STATUS Status = EfiGetInfo(ImageData, ImageDataSize, &DecompSize, &ScratchSize);
+        if (Status != EFI_SUCCESS) {
+          Error (NULL, 0, 4003, "Resource", "cannot get decompression info");
+          goto BailOut;
+        }
+        VOID *DecompData = malloc(DecompSize);
+        if (!DecompData) {
+          Error (NULL, 0, 4003, "Resource", "memory cannot be allocated!");
+          goto BailOut;
+        }
+        VOID *ScratchData = malloc(ScratchSize);
+        if (!ScratchData) {
+          Error (NULL, 0, 4003, "Resource", "memory cannot be allocated!");
+          goto BailOut;
+        }
+        Status = EfiDecompress(ImageData, ImageDataSize, DecompData, DecompSize, ScratchData, ScratchSize);
+        if (Status != EFI_SUCCESS) {
+          Error (NULL, 0, 3002, "Invalid", "could not decompress data");
+          goto BailOut;
+        }
+        free(ImageData);
+        ImageData = DecompData;
+        ImageDataSize = DecompSize;
+      }
+
+      // TODO: multiple images
+      FILE *fp = fopen(mOptions.OutFileName, "wb");
+      if (!fp) {
+        Error (NULL, 0, 0001, "Error opening file", mOptions.OutFileName);
+        goto BailOut;
+      }
+      if (fwrite(ImageData, ImageDataSize, 1, fp) != 1) {
+        Error (NULL, 0, 0005, "Failed to write all file bytes to output file.", NULL);
+        fclose(fp);
+        goto BailOut;
+      }
+      fclose(fp);
+      free(ImageData);
+      fprintf(stdout, "  Saved image to: %s\n", mOptions.OutFileName);
+    }
     //
     // If last image, then we're done
     //
@@ -1631,16 +1691,9 @@ Returns:
     //
     // Seek to the start of the next image
     //
-    if (mOptions.Pci23 == 1) {
-      if (fseek (InFptr, ImageStart + (PciDs23.ImageLength * 512), SEEK_SET)) {
-        Error (NULL, 0, 3001, "Not supported", "Failed to seek to next image!");
-        goto BailOut;
-      }
-    } else {
-      if (fseek (InFptr, ImageStart + (PciDs30.ImageLength * 512), SEEK_SET)) {
-        Error (NULL, 0, 3001, "Not supported", "Failed to seek to next image!");
-        goto BailOut;
-      }
+    if (fseek (InFptr, ImageStart + ImageSize, SEEK_SET)) {
+      Error (NULL, 0, 3001, "Not supported", "Failed to seek to next image!");
+      goto BailOut;
     }
   }
 

@@ -20,6 +20,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <IndustryStandard/Pci30.h>
 
 #include "Compress.h"
+#include "Decompress.h"
 #include "CommonLib.h"
 
 //
