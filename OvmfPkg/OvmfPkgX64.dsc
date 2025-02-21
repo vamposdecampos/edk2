@@ -966,6 +966,7 @@
 !endif
 
   OvmfPkg/PlatformDxe/Platform.inf
+  OvmfPkg/BogoDxe/Bogo.inf
   OvmfPkg/AmdSevDxe/AmdSevDxe.inf {
     <LibraryClasses>
     PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf

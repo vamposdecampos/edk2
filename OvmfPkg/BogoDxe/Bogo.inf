@@ -1,0 +1,31 @@
+## @file
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = BogoDxe
+  FILE_GUID                      = 3E845E4D-C214-4160-8EB1-589A9947C49D
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = BogoInit
+  UNLOAD_IMAGE                   = BogoUnload
+
+[Sources]
+  Bogo.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  UefiDriverEntryPoint
+
+[Pcd]
+
+[Protocols]
+
+[Guids]
+
+[Depex]
+  TRUE
