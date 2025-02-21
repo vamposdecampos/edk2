@@ -25,6 +25,7 @@ CoreNotifyProtocolEntry (
   PROTOCOL_NOTIFY  *ProtNotify;
   LIST_ENTRY       *Link;
 
+  DEBUG ((DEBUG_INFO, "NotifyProtocolEntry: %g\n", ProtEntry->ProtocolID));
   ASSERT_LOCKED (&gProtocolDatabaseLock);
 
   for (Link = ProtEntry->Notify.ForwardLink; Link != &ProtEntry->Notify; Link = Link->ForwardLink) {
@@ -105,6 +106,8 @@ CoreRegisterProtocolNotify (
   PROTOCOL_ENTRY   *ProtEntry;
   PROTOCOL_NOTIFY  *ProtNotify;
   EFI_STATUS       Status;
+
+  DEBUG ((DEBUG_INFO, "RegisterProtocolNotify: %g\n", Protocol));
 
   if ((Protocol == NULL) || (Event == NULL) || (Registration == NULL)) {
     return EFI_INVALID_PARAMETER;

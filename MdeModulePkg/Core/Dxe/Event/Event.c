@@ -9,6 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "DxeMain.h"
 #include "Event.h"
+#include <Guid/IdleLoopEvent.h>
 
 ///
 /// gEfiCurrentTpl - Current Task priority level
@@ -533,6 +534,9 @@ CoreSignalEvent (
   // If the event is not already signalled, do so
   //
 
+  if (!IsZeroGuid(&Event->EventGroup) && !CompareGuid(&Event->EventGroup, &gIdleLoopEventGuid)) {
+    DEBUG((DEBUG_INFO, "SignalEvent: %g cnt=%d\n", Event->EventGroup, Event->SignalCount));
+  }
   if (Event->SignalCount == 0x00000000) {
     Event->SignalCount++;
 
