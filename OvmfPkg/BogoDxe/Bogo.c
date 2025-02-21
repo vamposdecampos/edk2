@@ -13,6 +13,9 @@ BogoReadyToBoot(
 	IN	VOID		*Context)
 {
 	DEBUG((DEBUG_INFO, "%a: called\n", __func__));
+	gST->ConOut->OutputString(gST->ConOut, L"\n*** Ready to boot ***\n");
+	gBS->Stall(3000000);
+	DEBUG((DEBUG_INFO, "%a: done\n", __func__));
 }
 
 EFI_STATUS
