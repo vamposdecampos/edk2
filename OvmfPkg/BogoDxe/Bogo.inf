@@ -21,12 +21,14 @@
   BaseLib
   DebugLib
   UefiDriverEntryPoint
+  UefiRuntimeServicesTableLib
 
 [Pcd]
 
 [Protocols]
 
 [Guids]
+  gEfiEventReadyToBootGuid			## CONSUMES ## Event
 
 [Depex]
   TRUE
