@@ -1668,7 +1668,9 @@ Returns:
       }
 
       // TODO: multiple images
-      FILE *fp = fopen(mOptions.OutFileName, "wb");
+      char namebuf[strlen(mOptions.OutFileName) + 5];
+      snprintf(namebuf, sizeof(namebuf) - 1, "%s-%d", mOptions.OutFileName, ImageCount);
+      FILE *fp = fopen(namebuf, "wb");
       if (!fp) {
         Error (NULL, 0, 0001, "Error opening file", mOptions.OutFileName);
         goto BailOut;
@@ -1680,7 +1682,7 @@ Returns:
       }
       fclose(fp);
       free(ImageData);
-      fprintf(stdout, "  Saved image to: %s\n", mOptions.OutFileName);
+      fprintf(stdout, "  Saved image to: %s\n", namebuf);
     }
     //
     // If last image, then we're done
