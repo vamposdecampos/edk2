@@ -16,6 +16,7 @@
 [LibraryClasses]
   UefiApplicationEntryPoint
   UefiLib
+  DevicePathLib
 
 [Protocols]
   gEfiShellParametersProtocolGuid				## CONSUMES
