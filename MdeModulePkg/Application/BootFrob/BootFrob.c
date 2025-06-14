@@ -34,6 +34,7 @@ static void hex_dump(const char *label, const void *data, UINTN size)
 static EFI_STATUS do_set(void)
 {
 	CHAR16 *boot_var;
+	CHAR16 *boot_attr_str;
 	CHAR16 *boot_desc;
 	UINT32 boot_attr = 0;
 	UINTN optdata_size = 0;
@@ -43,9 +44,18 @@ static EFI_STATUS do_set(void)
 	if (argc < 7)
 		return usage();
 	boot_var = argv[2];
-//	boot_attr_str = argv[3];
+	boot_attr_str = argv[3];
 	boot_desc = argv[4];
 //	boot_optdata = argv[5];
+
+	UINTN val;
+	status = StrHexToUintnS(boot_attr_str, NULL, &val);
+	if (EFI_ERROR(status)) {
+		Print(L"unable to parse attributes '%s'\n", boot_attr_str);
+		return status;
+	}
+	boot_attr = val;
+
 	devpath = ConvertTextToDevicePath(argv[6]);
 	if (!devpath) {
 		Print(L"unable to convert devpath\n");
