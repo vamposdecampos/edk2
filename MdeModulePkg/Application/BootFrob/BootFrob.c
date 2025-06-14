@@ -2,6 +2,7 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DevicePathLib.h>
@@ -32,6 +33,7 @@ static void hex_dump(const char *label, const void *data, UINTN size)
 
 static EFI_STATUS do_set(void)
 {
+	CHAR16 *boot_var;
 	CHAR16 *boot_desc;
 	UINT32 boot_attr = 0;
 	UINTN optdata_size = 0;
@@ -40,7 +42,7 @@ static EFI_STATUS do_set(void)
 
 	if (argc < 7)
 		return usage();
-//	boot_var = argv[2];
+	boot_var = argv[2];
 //	boot_attr_str = argv[3];
 	boot_desc = argv[4];
 //	boot_optdata = argv[5];
@@ -61,6 +63,8 @@ static EFI_STATUS do_set(void)
 	// TODO: size-check boot_desc
 	UINT16 desc_size = StrLen(boot_desc) * 2 + 2;
 	hex_dump("desc", boot_desc, desc_size);
+
+	// TODO: EfiBootManagerLoadOptionToVariable ?
 
 	UINT16 devpath_size = devpath_size_n;
 	UINTN loadopt_size = sizeof(boot_attr) + sizeof(devpath_size) +
@@ -86,9 +90,13 @@ static EFI_STATUS do_set(void)
 	dp += optdata_size;
 	ASSERT(dp <= (loadopt + loadopt_size));
 
-	UINTN loadopt_size_actual = dp - loadopt;
 	hex_dump("loadopt", loadopt, loadopt_size);
-	hex_dump("loadopt", loadopt, loadopt_size_actual);
+
+	status = gRT->SetVariable(boot_var, &gEfiGlobalVariableGuid,
+		EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+		loadopt_size, loadopt);
+	if (EFI_ERROR(status))
+		Print(L"unable to set variable: %r\n", status);
 
 	FreePool(loadopt);
 out_dp:
