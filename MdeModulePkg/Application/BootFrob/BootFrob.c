@@ -16,8 +16,9 @@ static CHAR16 **argv;
 static EFI_STATUS usage(void)
 {
 	Print(L"Usage:\n"
-		"%s set <boot-var> <attributes> <description> <optional-data> <device-path>...\n",
-		argv[0]);
+		"%s set <boot-var> <attributes> <description> <optional-data> <device-path>\n"
+		"%s run <device-path>\n",
+		argv[0], argv[0]);
 	return EFI_UNSUPPORTED;
 }
 
@@ -141,6 +142,52 @@ out_dp:
 	return status;
 }
 
+static EFI_STATUS do_run(void)
+{
+	EFI_DEVICE_PATH_PROTOCOL *devpath;
+	EFI_STATUS status = EFI_SUCCESS;
+
+	if (argc < 3)
+		return usage();
+
+	devpath = ConvertTextToDevicePath(argv[2]);
+	if (!devpath) {
+		Print(L"unable to convert devpath\n");
+		return EFI_OUT_OF_RESOURCES;
+	}
+
+	UINTN devpath_size_n = GetDevicePathSize(devpath);
+	hex_dump("DevPath", devpath, devpath_size_n);
+	CHAR16 *devpath_str = ConvertDevicePathToText(devpath, FALSE, FALSE);
+	if (devpath_str) {
+		Print(L"DevPath: %s\n", devpath_str);
+		FreePool(devpath_str);
+	}
+
+	// TODO? EfiBootManagerConnectDevicePath
+
+	EFI_HANDLE img_handle = NULL;
+	status = gBS->LoadImage(TRUE, gImageHandle, devpath, NULL, 0, &img_handle);
+	if (status == EFI_SECURITY_VIOLATION && img_handle)
+		gBS->UnloadImage(img_handle);
+	if (EFI_ERROR(status)) {
+		Print(L"unable to load image: %r\n", status);
+		goto out_dp;
+	}
+	Print(L"loaded\n");
+
+	status = gBS->StartImage(img_handle, NULL, NULL);
+	if (EFI_ERROR(status)) {
+		Print(L"unable to start image: %r\n", status);
+		goto out_dp;
+	}
+	Print(L"started\n");
+
+out_dp:
+	FreePool(devpath);
+	return status;
+}
+
 EFI_STATUS EFIAPI UefiMain(
 	IN EFI_HANDLE		img_handle,
 	IN EFI_SYSTEM_TABLE	*system_table)
@@ -166,5 +213,7 @@ EFI_STATUS EFIAPI UefiMain(
 
 	if (!StrCmp(argv[1], L"set"))
 		return do_set();
+	if (!StrCmp(argv[1], L"run"))
+		return do_run();
 	return usage();
 }
