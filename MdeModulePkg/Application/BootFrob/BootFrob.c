@@ -66,6 +66,12 @@ static EFI_STATUS do_set(void)
 
 	UINTN devpath_size_n = GetDevicePathSize(devpath);
 	hex_dump("DevPath", devpath, devpath_size_n);
+	CHAR16 *devpath_str = ConvertDevicePathToText(devpath, FALSE, FALSE);
+	if (devpath_str) {
+		Print(L"DevPath: %s\n", devpath_str);
+		FreePool(devpath_str);
+	}
+
 	if (devpath_size_n > 0xffff) {
 		Print(L"devpath too long (%u)\n", devpath_size_n);
 		status = EFI_INVALID_PARAMETER;
