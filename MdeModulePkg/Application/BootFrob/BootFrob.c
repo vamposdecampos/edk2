@@ -36,7 +36,9 @@ static EFI_STATUS do_set(void)
 	CHAR16 *boot_var;
 	CHAR16 *boot_attr_str;
 	CHAR16 *boot_desc;
+	CHAR16 *boot_optdata;
 	UINT32 boot_attr = 0;
+	UINT8 *optdata_buf = NULL;
 	UINTN optdata_size = 0;
 	EFI_DEVICE_PATH_PROTOCOL *devpath;
 	EFI_STATUS status = EFI_SUCCESS;
@@ -46,7 +48,7 @@ static EFI_STATUS do_set(void)
 	boot_var = argv[2];
 	boot_attr_str = argv[3];
 	boot_desc = argv[4];
-//	boot_optdata = argv[5];
+	boot_optdata = argv[5];
 
 	UINTN val;
 	status = StrHexToUintnS(boot_attr_str, NULL, &val);
@@ -74,6 +76,23 @@ static EFI_STATUS do_set(void)
 	UINT16 desc_size = StrLen(boot_desc) * 2 + 2;
 	hex_dump("desc", boot_desc, desc_size);
 
+	optdata_size = StrLen(boot_optdata) * 2; // no NUL termination
+	if (optdata_size && !StrnCmp(boot_optdata, L"=", 1)) {
+		UINTN bufsize = (StrLen(boot_optdata) - 1) >> 1;
+		UINT8 *optdata_buf = AllocatePool(bufsize);
+		if (!optdata_buf) {
+			status = EFI_OUT_OF_RESOURCES;
+			goto out_dp;
+		}
+		status = StrHexToBytes(boot_optdata + 1, StrLen(boot_optdata) - 1, optdata_buf, bufsize);
+		if (EFI_ERROR(status)) {
+			Print(L"unable to parse hex optdata '%s'\n", boot_optdata + 1);
+			goto out_dp;
+		}
+		boot_optdata = (void *) optdata_buf;
+		optdata_size = bufsize;
+	}
+
 	// TODO: EfiBootManagerLoadOptionToVariable ?
 
 	UINT16 devpath_size = devpath_size_n;
@@ -96,7 +115,7 @@ static EFI_STATUS do_set(void)
 	dp += desc_size;
 	CopyMem(dp, devpath, devpath_size);
 	dp += devpath_size;
-	// TODO: optional data
+	CopyMem(dp, boot_optdata, optdata_size);
 	dp += optdata_size;
 	ASSERT(dp <= (loadopt + loadopt_size));
 
@@ -110,6 +129,8 @@ static EFI_STATUS do_set(void)
 
 	FreePool(loadopt);
 out_dp:
+	if (optdata_buf)
+		FreePool(optdata_buf);
 	FreePool(devpath);
 	return status;
 }
