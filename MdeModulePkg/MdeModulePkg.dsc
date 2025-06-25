@@ -207,6 +207,7 @@
 [Components]
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
   MdeModulePkg/Application/BootFrob/BootFrob.inf
+  MdeModulePkg/Application/HiiDump/HiiDump.inf
   MdeModulePkg/Application/DumpDynPcd/DumpDynPcd.inf
   MdeModulePkg/Application/MemoryProfileInfo/MemoryProfileInfo.inf
 
