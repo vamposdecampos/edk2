@@ -1,0 +1,8 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = BogoPkg
+  PACKAGE_GUID                   = 44f62ddc-acee-41b9-b9e5-9a453f24091a
+  PACKAGE_VERSION                = 0.1
+
+[Guids]
+  gBogoFormSetGuid = { 0x8f80d6e2, 0x0459, 0x4aca, { 0x98, 0xeb, 0x43, 0xbc, 0xa8, 0x2f, 0xf5, 0xe3 } }

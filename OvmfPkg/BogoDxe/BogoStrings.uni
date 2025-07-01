@@ -1,0 +1,6 @@
+#langdef en-US "English"
+
+#string STR_BOGO_TITLE			#language en-US		"Bogo"
+#string STR_BOGO_HELP			#language en-US		"No help for you"
+
+#string STR_BOGO_FORM_TITLE		#language en-US		"Bogo Form"

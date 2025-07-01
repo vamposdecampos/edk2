@@ -13,22 +13,29 @@
 
 [Sources]
   Bogo.c
+  BogoForm.vfr
+  BogoStrings.uni
 
 [Packages]
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OvmfPkg/BogoDxe/BogoPkg.dec
 
 [LibraryClasses]
   BaseLib
   DebugLib
+  HiiLib
   UefiDriverEntryPoint
   UefiRuntimeServicesTableLib
 
 [Pcd]
 
 [Protocols]
+  gEfiDevicePathProtocolGuid
 
 [Guids]
   gEfiEventReadyToBootGuid			## CONSUMES ## Event
+  gBogoFormSetGuid
 
 [Depex]
   TRUE

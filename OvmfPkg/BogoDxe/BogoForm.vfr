@@ -1,0 +1,13 @@
+#include "BogoFormData.h"
+
+formset
+	guid		= gBogoFormSetGuid,
+	title		= STRING_TOKEN(STR_BOGO_TITLE),
+	help		= STRING_TOKEN(STR_BOGO_HELP),
+	classguid	= EFI_HII_PLATFORM_SETUP_FORMSET_GUID,
+
+	form formid = BOGO_CONFIGURATION_FORM_ID,
+		title = STRING_TOKEN(STR_BOGO_FORM_TITLE);
+	endform;
+
+endformset;
