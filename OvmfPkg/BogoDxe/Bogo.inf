@@ -36,6 +36,7 @@
 [Guids]
   gEfiEventReadyToBootGuid			## CONSUMES ## Event
   gBogoFormSetGuid
+  gEfiIfrFrontPageGuid
 
 [Depex]
   TRUE
