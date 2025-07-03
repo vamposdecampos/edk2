@@ -1,13 +1,37 @@
 #include "BogoFormData.h"
 
 formset
-	guid		= gBogoFormSetGuid,
+	guid		= BOGO_FORMSET_GUID,
 	title		= STRING_TOKEN(STR_BOGO_TITLE),
 	help		= STRING_TOKEN(STR_BOGO_HELP),
 	classguid	= EFI_HII_PLATFORM_SETUP_FORMSET_GUID | gEfiIfrFrontPageGuid,
 
+	efivarstore BOGO_VARSTORE_DATA,
+		attribute = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+		name = BogoPrefs,
+		guid = BOGO_FORMSET_GUID;
+
 	form formid = BOGO_CONFIGURATION_FORM_ID,
 		title = STRING_TOKEN(STR_BOGO_FORM_TITLE);
+
+		text
+			help = STRING_TOKEN(STR_BOGO_BOTTOM_SUBTITLE),
+			text = STRING_TOKEN(STR_BOGO_BLURB);
+		text
+			help = STRING_TOKEN(STR_EMPTY),
+			text = STRING_TOKEN(STR_EMPTY);
+
+		checkbox
+			varid = BogoPrefs.check,
+			prompt = STRING_TOKEN(STR_BOGO_CHECKBOX),
+			help = STRING_TOKEN(STR_BOGO_CHECKBOX_HELP),
+		endcheckbox;
+
+		text
+			help = STRING_TOKEN(STR_EMPTY),
+			text = STRING_TOKEN(STR_EMPTY);
+		subtitle
+			text = STRING_TOKEN(STR_BOGO_BOTTOM_SUBTITLE);
 	endform;
 
 endformset;

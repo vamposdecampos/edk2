@@ -9,7 +9,7 @@
 #include <Guid/EventGroup.h>
 #include <Protocol/DevicePath.h>
 
-#define BOGO_FORMSET_GUID { 0x8f80d6e2, 0x0459, 0x4aca, { 0x98, 0xeb, 0x43, 0xbc, 0xa8, 0x2f, 0xf5, 0xe3 } }
+#include "BogoFormData.h"
 
 extern UINT8 BogoFormBin[];
 extern UINT8 BogoDxeStrings[];

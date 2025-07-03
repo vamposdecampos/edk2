@@ -1,6 +1,14 @@
 #langdef en-US "English"
+#langdef fr-FR "Francais"
 
 #string STR_BOGO_TITLE			#language en-US		"Bogo"
 #string STR_BOGO_HELP			#language en-US		"No help for you"
 
 #string STR_BOGO_FORM_TITLE		#language en-US		"Bogo Form"
+
+#string STR_BOGO_BLURB			#language en-US		"Hello there"
+#string STR_EMPTY			#language en-US		""
+#string STR_BOGO_BOTTOM_SUBTITLE	#language en-US		"One might escape by pressing ESC"
+
+#string STR_BOGO_CHECKBOX		#language en-US		"Do something"
+#string STR_BOGO_CHECKBOX_HELP		#language en-US		"Don't just stand there"
