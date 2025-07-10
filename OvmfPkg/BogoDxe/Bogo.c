@@ -118,6 +118,9 @@ BogoInit(
 
 	DEBUG((DEBUG_INFO, "%a: called\n", __func__));
 
+	bogo_driver_binding.ImageHandle = ImageHandle;
+	bogo_driver_binding.DriverBindingHandle = ImageHandle;
+
 	status = gBS->InstallMultipleProtocolInterfaces(&drv_handle,
 		&gEfiDevicePathProtocolGuid, &bogo_vendor_dp,
 		&gEfiComponentName2ProtocolGuid, &bogo_component_name2,
