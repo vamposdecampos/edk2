@@ -9,6 +9,7 @@
 #include <Guid/EventGroup.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/ComponentName2.h>
+#include <Protocol/DriverBinding.h>
 
 #include "BogoFormData.h"
 
@@ -42,6 +43,27 @@ EFI_COMPONENT_NAME2_PROTOCOL bogo_component_name2 = {
 	"eng",
 };
 
+
+EFI_STATUS
+EFIAPI
+bogo_supported(
+	IN EFI_DRIVER_BINDING_PROTOCOL *This,
+	IN EFI_HANDLE			ControllerHandle,
+	IN EFI_DEVICE_PATH_PROTOCOL	*RemainingDevicePath OPTIONAL) 
+{
+	DEBUG((DEBUG_INFO, "%a: ctrl %p devpath %p\n", __func__, ControllerHandle, RemainingDevicePath));
+	return EFI_UNSUPPORTED;
+}
+
+static
+EFI_DRIVER_BINDING_PROTOCOL bogo_driver_binding = {
+	&bogo_supported,
+	NULL, //&bogo_start,
+	NULL, //&bogo_stop,
+	0x10,
+	NULL,
+	NULL,
+};
 
 extern UINT8 BogoFormBin[];
 extern UINT8 BogoDxeStrings[];
@@ -99,6 +121,7 @@ BogoInit(
 	status = gBS->InstallMultipleProtocolInterfaces(&drv_handle,
 		&gEfiDevicePathProtocolGuid, &bogo_vendor_dp,
 		&gEfiComponentName2ProtocolGuid, &bogo_component_name2,
+		&gEfiDriverBindingProtocolGuid, &bogo_driver_binding,
 		NULL);
 	DEBUG((DEBUG_INFO, "%a: install: %r, drv %p, image %p\n", __func__, status, drv_handle, ImageHandle));
 

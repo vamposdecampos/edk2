@@ -32,6 +32,7 @@
 
 [Protocols]
   gEfiDevicePathProtocolGuid
+  gEfiDriverBindingProtocolGuid
 
 [Guids]
   gEfiEventReadyToBootGuid			## CONSUMES ## Event
