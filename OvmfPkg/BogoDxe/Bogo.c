@@ -8,14 +8,14 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Guid/EventGroup.h>
 #include <Protocol/DevicePath.h>
-#include <Protocol/ComponentName.h>
+#include <Protocol/ComponentName2.h>
 
 #include "BogoFormData.h"
 
 EFI_STATUS
 EFIAPI
 bogo_get_driver_name(
-	IN  EFI_COMPONENT_NAME_PROTOCOL		*This,
+	IN  EFI_COMPONENT_NAME2_PROTOCOL	*This,
 	IN  CHAR8				*Language,
 	OUT CHAR16				**DriverName)
 {
@@ -26,7 +26,7 @@ bogo_get_driver_name(
 EFI_STATUS
 EFIAPI
 bogo_get_controller_name(
-	IN  EFI_COMPONENT_NAME_PROTOCOL		*This,
+	IN  EFI_COMPONENT_NAME2_PROTOCOL	*This,
 	IN  EFI_HANDLE				ControllerHandle,
 	IN  EFI_HANDLE				ChildHandle		OPTIONAL,
 	IN  CHAR8				*Language,
@@ -36,7 +36,7 @@ bogo_get_controller_name(
 }
 
 static
-EFI_COMPONENT_NAME_PROTOCOL bogo_component_name = {
+EFI_COMPONENT_NAME2_PROTOCOL bogo_component_name2 = {
 	bogo_get_driver_name,
 	bogo_get_controller_name,
 	"eng",
@@ -98,7 +98,7 @@ BogoInit(
 
 	status = gBS->InstallMultipleProtocolInterfaces(&drv_handle,
 		&gEfiDevicePathProtocolGuid, &bogo_vendor_dp,
-		&gEfiComponentNameProtocolGuid, &bogo_component_name,
+		&gEfiComponentName2ProtocolGuid, &bogo_component_name2,
 		NULL);
 	DEBUG((DEBUG_INFO, "%a: install: %r, drv %p, image %p\n", __func__, status, drv_handle, ImageHandle));
 
