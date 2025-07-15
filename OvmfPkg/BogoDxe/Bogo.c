@@ -105,6 +105,20 @@ BogoReadyToBoot(
 	DEBUG((DEBUG_INFO, "%a: done\n", __func__));
 }
 
+static EFI_HANDLE_PROTOCOL orig_handle_protocol;
+
+EFI_STATUS
+EFIAPI
+hook_handle_protocol(IN EFI_HANDLE handle, IN EFI_GUID *protocol, OUT VOID **intf)
+{
+	EFI_STATUS res;
+
+	DEBUG((DEBUG_INFO, "%a: handle %x, protocol %g\n", __func__, handle, protocol));
+	res = orig_handle_protocol(handle, protocol, intf);
+	DEBUG((DEBUG_INFO, "%a: handle %x, protocol %g, res %r, intf %p\n", __func__, handle, protocol, res, *intf));
+	return res;
+}
+
 EFI_STATUS
 EFIAPI
 BogoInit(
@@ -115,8 +129,14 @@ BogoInit(
 	EFI_EVENT evt;
 	EFI_HANDLE drv_handle = NULL;
 	EFI_HANDLE hii_handle;
+	EFI_TPL tpl;
 
 	DEBUG((DEBUG_INFO, "%a: called\n", __func__));
+
+	tpl = gBS->RaiseTPL(TPL_HIGH_LEVEL);
+	orig_handle_protocol = gBS->HandleProtocol;
+	gBS->HandleProtocol = hook_handle_protocol;
+	gBS->RestoreTPL(tpl);
 
 	bogo_driver_binding.ImageHandle = ImageHandle;
 	bogo_driver_binding.DriverBindingHandle = ImageHandle;
@@ -148,6 +168,13 @@ EFIAPI
 BogoUnload(
 	IN	EFI_HANDLE	ImageHandle)
 {
+	EFI_TPL tpl;
+
 	DEBUG((DEBUG_INFO, "%a: called\n", __func__));
+
+	tpl = gBS->RaiseTPL(TPL_HIGH_LEVEL);
+	gBS->HandleProtocol = orig_handle_protocol;
+	gBS->RestoreTPL(tpl);
+
 	return EFI_SUCCESS;
 }
