@@ -6,6 +6,7 @@
 #include <Library/DebugLib.h>
 #include <Library/HiiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Guid/EventGroup.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/ComponentName2.h>
@@ -106,6 +107,7 @@ BogoReadyToBoot(
 }
 
 static EFI_HANDLE_PROTOCOL orig_handle_protocol;
+static EFI_SET_VARIABLE orig_set_variable;
 
 EFI_STATUS
 EFIAPI
@@ -116,6 +118,17 @@ hook_handle_protocol(IN EFI_HANDLE handle, IN EFI_GUID *protocol, OUT VOID **int
 	DEBUG((DEBUG_INFO, "%a: handle %x, protocol %g\n", __func__, handle, protocol));
 	res = orig_handle_protocol(handle, protocol, intf);
 	DEBUG((DEBUG_INFO, "%a: handle %x, protocol %g, res %r, intf %p\n", __func__, handle, protocol, res, *intf));
+	return res;
+}
+
+EFI_STATUS
+EFIAPI
+hook_set_variable(IN CHAR16 *name, IN EFI_GUID *guid, IN UINT32 attr, IN UINTN size, IN VOID *data)
+{
+	EFI_STATUS res;
+
+	res = orig_set_variable(name, guid, attr, size, data);
+	DEBUG((DEBUG_INFO, "%a: '%s'-%g attr 0x%x size %d - %r\n", __func__, name, guid, attr, size, res));
 	return res;
 }
 
@@ -136,6 +149,8 @@ BogoInit(
 	tpl = gBS->RaiseTPL(TPL_HIGH_LEVEL);
 	orig_handle_protocol = gBS->HandleProtocol;
 	gBS->HandleProtocol = hook_handle_protocol;
+	orig_set_variable = gRT->SetVariable;
+	gRT->SetVariable = hook_set_variable;
 	gBS->RestoreTPL(tpl);
 
 	bogo_driver_binding.ImageHandle = ImageHandle;
@@ -174,6 +189,7 @@ BogoUnload(
 
 	tpl = gBS->RaiseTPL(TPL_HIGH_LEVEL);
 	gBS->HandleProtocol = orig_handle_protocol;
+	gRT->SetVariable = hook_set_variable;
 	gBS->RestoreTPL(tpl);
 
 	return EFI_SUCCESS;
